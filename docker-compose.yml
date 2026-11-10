@@ -1,0 +1,78 @@
+name: dash-ai-studio
+
+# Três peças:
+#   postgres  ← só a api tem a senha (o agente não tem rede nem credencial para chegar aqui)
+#   api       ← catálogo com SQL, validação, rascunhos, query por bloco; serve também a página
+#   agent     ← claude -p com o token da assinatura, só com as ferramentas MCP do MVP
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: dash
+      POSTGRES_USER: dash
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dash-local}
+    ports:
+      - "${DB_PORT:-5433}:5432"
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - pgdata:/var/lib/postgresql/data
+    networks: [dados]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dash -d dash"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  seed:
+    build: ./api
+    command: ["python", "/db/seed.py"]
+    environment:
+      DATABASE_URL: postgresql://dash:${POSTGRES_PASSWORD:-dash-local}@postgres:5432/dash
+    volumes:
+      - ./db:/db:ro
+    networks: [dados]
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  api:
+    build: ./api
+    environment:
+      DATABASE_URL: postgresql://dash:${POSTGRES_PASSWORD:-dash-local}@postgres:5432/dash
+      AGENT_PORT: ${AGENT_PORT:-8100}
+    ports:
+      - "${API_PORT:-8000}:8000"
+    volumes:
+      - ./api/app:/srv/app:ro
+      - ./api/tests:/srv/tests:ro
+      - ./web:/web:ro
+      - ./specs:/specs:ro
+    networks: [dados, app]
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+
+  agent:
+    build: ./agent
+    env_file:
+      - path: ./.env
+        required: false
+    environment:
+      API_URL: http://api:8000
+      RUNS_DIR: /runs
+    ports:
+      - "${AGENT_PORT:-8100}:8100"
+    volumes:
+      - ./runs:/runs
+    # Só a rede "app": o agente enxerga a api, nunca o postgres.
+    networks: [app]
+    depends_on:
+      - api
+
+networks:
+  dados: {}
+  app: {}
+
+volumes:
+  pgdata: {}

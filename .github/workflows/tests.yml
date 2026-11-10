@@ -1,0 +1,47 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  api:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: dash
+          POSTGRES_USER: dash
+          POSTGRES_PASSWORD: dash-local
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U dash -d dash"
+          --health-interval 2s --health-timeout 3s --health-retries 30
+    env:
+      DATABASE_URL: postgresql://dash:dash-local@localhost:5432/dash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r api/requirements.txt
+      - name: Schema e dados fictícios
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f db/init.sql
+          python db/seed.py
+      - name: Testes da API
+        working-directory: api
+        run: pytest -q
+
+  agent:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm install --omit=dev
+        working-directory: agent
+      - name: Sintaxe do agente, evals e front
+        run: for f in agent/*.mjs evals/*.mjs web/*.js; do node --check "$f"; done

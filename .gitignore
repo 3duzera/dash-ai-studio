@@ -1,0 +1,9 @@
+.env
+.env.*
+!.env.example
+runs/*.jsonl
+evals/resultados/*
+!evals/resultados/.gitkeep
+__pycache__/
+.pytest_cache/
+node_modules/

@@ -1,0 +1,124 @@
+{
+  "schemaVersion": 1,
+  "kitVersion": "mvp-1",
+  "title": "Entregas e devoluções",
+  "subtitle": "Prazo, atraso, devolução e cancelamento",
+  "params": {
+    "state": {
+      "type": "state",
+      "default": [
+        "sp",
+        "rj",
+        "mg",
+        "pr",
+        "ba",
+        "rs"
+      ],
+      "label": "Estados"
+    }
+  },
+  "rows": [
+    {
+      "blocks": [
+        {
+          "id": "no-prazo",
+          "kind": "kpi_progress",
+          "span": 4,
+          "title": "Entregues no prazo",
+          "tone": "positive",
+          "query": {
+            "metric": "orders_on_time",
+            "of": "orders_delivered",
+            "filters": {
+              "state": "$state"
+            }
+          }
+        },
+        {
+          "id": "atraso",
+          "kind": "kpi",
+          "span": 4,
+          "title": "Atraso na entrega",
+          "tone": "negative",
+          "query": {
+            "metric": "late_delivery_rate",
+            "filters": {
+              "state": "$state"
+            }
+          }
+        },
+        {
+          "id": "devolucao",
+          "kind": "kpi",
+          "span": 4,
+          "title": "Devolução",
+          "tone": "negative",
+          "query": {
+            "metric": "return_rate",
+            "filters": {
+              "state": "$state"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "blocks": [
+        {
+          "id": "atraso-estado-canal",
+          "kind": "heatmap",
+          "span": 12,
+          "title": "Atraso por estado e canal",
+          "query": {
+            "metric": "late_delivery_rate",
+            "dimensions": [
+              "state",
+              "channel"
+            ],
+            "filters": {
+              "state": "$state"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "blocks": [
+        {
+          "id": "devolucao-categoria",
+          "kind": "ranking_bar",
+          "span": 6,
+          "title": "Devolução por categoria",
+          "tone": "negative",
+          "query": {
+            "metric": "return_rate",
+            "dimensions": [
+              "category"
+            ],
+            "filters": {
+              "state": "$state"
+            },
+            "sort": "desc"
+          }
+        },
+        {
+          "id": "cancelamento-canal",
+          "kind": "bar",
+          "span": 6,
+          "title": "Cancelamento por canal",
+          "query": {
+            "metric": "cancel_rate",
+            "dimensions": [
+              "channel"
+            ],
+            "filters": {
+              "state": "$state"
+            },
+            "sort": "desc"
+          },
+          "tone": "negative"
+        }
+      ]
+    }
+  ]
+}

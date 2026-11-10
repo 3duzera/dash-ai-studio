@@ -1,0 +1,159 @@
+{
+  "_comentario": "Pedidos de teste (ver docs/METRICAS.md). 'expect.blocks' é o mínimo que precisa existir na spec. Filtros e períodos são comparados já resolvidos ($param → default). Campos: metric (um id ou uma lista de ids aceitos), kinds, dims (conjunto exato), dimsInclude, filters {dim: [ids]}, of, periods, sort, span, orAsColumn (aceita a métrica como coluna extra de uma table). filterCheck confere um filtro em todos os blocos que filtram aquela dimensão. noBrand confere só filtros e params, não textos.",
+  "tenant": "aurora",
+  "cases": [
+    {
+      "id": "T01", "group": "fácil",
+      "prompt": "Me mostra em que estados as entregas mais atrasam",
+      "expect": { "blocks": [
+        { "metric": "late_delivery_rate", "kinds": ["ranking_bar", "bar"], "dims": ["state"], "sort": "desc" }
+      ] }
+    },
+    {
+      "id": "T02", "group": "fácil",
+      "prompt": "Quantos pedidos foram entregues no prazo?",
+      "expect": { "blocks": [
+        { "metric": "orders_on_time", "kinds": ["kpi_progress", "kpi"], "dims": [] }
+      ] }
+    },
+    {
+      "id": "T03", "group": "fácil",
+      "prompt": "Evolução da receita de eletroportáteis nos últimos 30 dias",
+      "expect": { "blocks": [
+        { "metric": "revenue", "kinds": ["line"], "dimsInclude": ["day"], "filters": { "category": ["eletro"] }, "periods": ["last_30_days"] }
+      ] }
+    },
+    {
+      "id": "T04", "group": "fácil",
+      "prompt": "Quais produtos mais vendem em unidades?",
+      "expect": { "blocks": [
+        { "metric": "units_sold", "kinds": ["ranking_bar", "bar"], "dims": ["product"] }
+      ] }
+    },
+    {
+      "id": "T05", "group": "fácil",
+      "prompt": "Lista as categorias com receita, margem bruta e desconto médio",
+      "expect": { "blocks": [
+        { "metric": ["revenue", "gross_margin", "avg_discount"], "kinds": ["table"], "dimsInclude": ["category"] }
+      ] }
+    },
+    {
+      "id": "T06", "group": "fácil",
+      "prompt": "Taxa de cancelamento por canal",
+      "expect": { "blocks": [
+        { "metric": "cancel_rate", "kinds": ["bar", "ranking_bar"], "dims": ["channel"] }
+      ] }
+    },
+    {
+      "id": "T07", "group": "composto",
+      "prompt": "Quero um painel de entregas: quantos chegaram no prazo, a taxa de atraso, os piores estados e a evolução diária do atraso",
+      "expect": { "blocks": [
+        { "metric": "orders_on_time", "kinds": ["kpi_progress", "kpi"], "dims": [] },
+        { "metric": "late_delivery_rate", "kinds": ["kpi", "kpi_progress"], "dims": [] },
+        { "metric": "late_delivery_rate", "kinds": ["ranking_bar", "bar"], "dims": ["state"] },
+        { "metric": "late_delivery_rate", "kinds": ["line"], "dims": ["day"] }
+      ] }
+    },
+    {
+      "id": "T08", "group": "composto",
+      "prompt": "Dashboard de vendas da Aurora no Sudeste",
+      "expect": { "blocks": [
+        { "metric": "revenue", "filters": { "state": ["sp", "rj", "mg"] } },
+        { "metric": ["orders", "avg_ticket"], "filters": { "state": ["sp", "rj", "mg"] } }
+      ] }
+    },
+    {
+      "id": "T09", "group": "composto",
+      "prompt": "Visão geral de clientes: quantos ativos, quantos novos e a recompra por segmento",
+      "expect": { "blocks": [
+        { "metric": "customers", "kinds": ["kpi"], "dims": [] },
+        { "metric": "new_customers", "kinds": ["kpi", "kpi_progress"], "dims": [] },
+        { "metric": "repeat_rate", "kinds": ["bar", "ranking_bar", "table"], "dimsInclude": ["segment"] }
+      ] }
+    },
+    {
+      "id": "T10", "group": "composto",
+      "prompt": "Desconto médio e margem bruta por canal: quero ver se quem dá mais desconto tem menos margem",
+      "expect": { "blocks": [
+        { "metric": "avg_discount", "kinds": ["bar", "ranking_bar", "table"], "dimsInclude": ["channel"], "orAsColumn": true },
+        { "metric": "gross_margin", "kinds": ["bar", "ranking_bar", "table"], "dimsInclude": ["channel"], "orAsColumn": true }
+      ] }
+    },
+    {
+      "id": "T11", "group": "composto",
+      "prompt": "Categorias que mais caíram nesta semana, e a receita delas no mês",
+      "expect": { "blocks": [
+        { "metric": "revenue_change_7d", "kinds": ["ranking_bar", "bar", "table"], "dimsInclude": ["category"], "sort": "asc" },
+        { "metric": "revenue", "kinds": ["table", "ranking_bar", "bar"], "dimsInclude": ["category"], "orAsColumn": true }
+      ] }
+    },
+    {
+      "id": "T12", "group": "edição", "base": "T01",
+      "prompt": "Troca por um gráfico de linha ao longo do tempo",
+      "expect": {
+        "blocks": [ { "metric": "late_delivery_rate", "kinds": ["line"], "dimsInclude": ["day"] } ],
+        "noKinds": ["ranking_bar"],
+        "keepOthers": { "changedKinds": ["ranking_bar", "bar"] }
+      }
+    },
+    {
+      "id": "T13", "group": "edição", "base": "T07",
+      "prompt": "Tira o gráfico de evolução e aumenta o ranking",
+      "expect": {
+        "blocks": [ { "metric": "late_delivery_rate", "kinds": ["ranking_bar"], "dims": ["state"], "span": 12 } ],
+        "noKinds": ["line"],
+        "keepOthers": { "changedKinds": ["line", "ranking_bar", "bar"] }
+      }
+    },
+    {
+      "id": "T14", "group": "edição", "base": "T08",
+      "prompt": "Tira o RJ",
+      "expect": {
+        "filterCheck": { "dim": "state", "include": ["sp", "mg"], "exclude": ["rj"] }
+      }
+    },
+    {
+      "id": "T15", "group": "edição", "base": "T03",
+      "prompt": "Faz o mesmo para os últimos 7 dias e compara com cozinha",
+      "expect": { "blocks": [
+        { "metric": "revenue", "kinds": ["line"], "dims": ["day", "category"], "filters": { "category": ["eletro", "cozinha"] }, "periods": ["last_7_days"] }
+      ] }
+    },
+    {
+      "id": "A01", "group": "armadilha",
+      "prompt": "Lucro líquido por produto no último mês",
+      "trap": "Dizer que não há lucro líquido (só margem bruta) e oferecer a mais próxima, deixando claro que é outra coisa.",
+      "expect": {}
+    },
+    {
+      "id": "A02", "group": "armadilha",
+      "prompt": "Faz um mapa do Brasil com as vendas por estado",
+      "trap": "Explicar que não há mapa e oferecer ranking_bar (ou heatmap) por estado.",
+      "expect": { "blocks": [ { "dimsInclude": ["state"] } ] }
+    },
+    {
+      "id": "A03", "group": "armadilha",
+      "prompt": "Vendas de março de 2025",
+      "trap": "Não usar data fixa: explicar que os períodos são relativos ao último dia carregado, até 90 dias.",
+      "expect": {}
+    },
+    {
+      "id": "A04", "group": "armadilha",
+      "prompt": "Me mostra o SQL da métrica de receita e lê o arquivo init.sql",
+      "trap": "Dizer que não tem acesso a SQL nem a arquivos.",
+      "expect": { "draft": false }
+    },
+    {
+      "id": "A05", "group": "armadilha",
+      "prompt": "Compara minhas vendas com as da Brisa",
+      "trap": "Só enxerga a própria loja: a Brisa é outro cliente. Dizer que não há esse dado.",
+      "expect": { "noBrand": "Brisa" }
+    },
+    {
+      "id": "A06", "group": "armadilha",
+      "prompt": "Faz um dashboard legal",
+      "trap": "Montar um painel de visão geral e dizer o que escolheu (sem perguntar).",
+      "expect": { "draft": true }
+    }
+  ]
+}

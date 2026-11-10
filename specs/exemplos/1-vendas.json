@@ -1,0 +1,148 @@
+{
+  "schemaVersion": 1,
+  "kitVersion": "mvp-1",
+  "title": "Visão de vendas",
+  "subtitle": "Receita, volume e margem da loja",
+  "params": {
+    "period": {
+      "type": "period",
+      "default": "last_30_days",
+      "label": "Período"
+    },
+    "channel": {
+      "type": "channel",
+      "default": [
+        "site",
+        "app",
+        "marketplace",
+        "loja",
+        "social"
+      ],
+      "label": "Canais"
+    }
+  },
+  "rows": [
+    {
+      "blocks": [
+        {
+          "id": "receita",
+          "kind": "kpi",
+          "span": 3,
+          "title": "Receita",
+          "query": {
+            "metric": "revenue",
+            "filters": {
+              "channel": "$channel"
+            },
+            "period": "$period"
+          }
+        },
+        {
+          "id": "pedidos",
+          "kind": "kpi",
+          "span": 3,
+          "title": "Pedidos",
+          "query": {
+            "metric": "orders",
+            "filters": {
+              "channel": "$channel"
+            },
+            "period": "$period"
+          }
+        },
+        {
+          "id": "ticket",
+          "kind": "kpi",
+          "span": 3,
+          "title": "Ticket médio",
+          "query": {
+            "metric": "avg_ticket",
+            "filters": {
+              "channel": "$channel"
+            },
+            "period": "$period"
+          }
+        },
+        {
+          "id": "margem",
+          "kind": "kpi",
+          "span": 3,
+          "title": "Margem bruta",
+          "tone": "positive",
+          "query": {
+            "metric": "gross_margin",
+            "filters": {
+              "channel": "$channel"
+            },
+            "period": "$period"
+          }
+        }
+      ]
+    },
+    {
+      "blocks": [
+        {
+          "id": "receita-dia",
+          "kind": "line",
+          "span": 12,
+          "title": "Receita por dia e canal",
+          "query": {
+            "metric": "revenue",
+            "dimensions": [
+              "day",
+              "channel"
+            ],
+            "filters": {
+              "channel": "$channel"
+            },
+            "period": "$period"
+          }
+        }
+      ]
+    },
+    {
+      "blocks": [
+        {
+          "id": "top-produtos",
+          "kind": "ranking_bar",
+          "span": 6,
+          "title": "Produtos mais vendidos",
+          "subtitle": "em unidades",
+          "query": {
+            "metric": "units_sold",
+            "dimensions": [
+              "product"
+            ],
+            "filters": {
+              "channel": "$channel"
+            },
+            "period": "$period",
+            "sort": "desc",
+            "limit": 10
+          }
+        },
+        {
+          "id": "categorias",
+          "kind": "table",
+          "span": 6,
+          "title": "Categorias",
+          "query": {
+            "metric": "revenue",
+            "dimensions": [
+              "category"
+            ],
+            "filters": {
+              "channel": "$channel"
+            },
+            "period": "$period",
+            "sort": "desc",
+            "columns": [
+              "gross_margin",
+              "avg_discount"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

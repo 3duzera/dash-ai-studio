@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "kitVersion": "mvp-1",
+  "title": "Clientes e recompra",
+  "subtitle": "Quem compra, quem é novo e quem volta",
+  "params": {
+    "period": {
+      "type": "period",
+      "default": "last_30_days",
+      "label": "Período"
+    }
+  },
+  "rows": [
+    {
+      "blocks": [
+        {
+          "id": "ativos",
+          "kind": "kpi",
+          "span": 4,
+          "title": "Clientes ativos",
+          "query": {
+            "metric": "customers",
+            "period": "$period"
+          }
+        },
+        {
+          "id": "novos",
+          "kind": "kpi_progress",
+          "span": 4,
+          "title": "Clientes novos",
+          "subtitle": "dos clientes ativos",
+          "query": {
+            "metric": "new_customers",
+            "of": "customers",
+            "period": "$period"
+          }
+        },
+        {
+          "id": "recompra",
+          "kind": "kpi",
+          "span": 4,
+          "title": "Recompra",
+          "tone": "positive",
+          "query": {
+            "metric": "repeat_rate",
+            "period": "$period"
+          }
+        }
+      ]
+    },
+    {
+      "blocks": [
+        {
+          "id": "recompra-segmento",
+          "kind": "bar",
+          "span": 6,
+          "title": "Recompra por segmento e canal",
+          "query": {
+            "metric": "repeat_rate",
+            "dimensions": [
+              "segment",
+              "channel"
+            ],
+            "period": "$period"
+          }
+        },
+        {
+          "id": "receita-cliente",
+          "kind": "ranking_bar",
+          "span": 6,
+          "title": "Receita por cliente, por canal",
+          "query": {
+            "metric": "revenue_per_customer",
+            "dimensions": [
+              "channel"
+            ],
+            "period": "$period",
+            "sort": "desc"
+          }
+        }
+      ]
+    },
+    {
+      "blocks": [
+        {
+          "id": "novos-dia",
+          "kind": "line",
+          "span": 12,
+          "title": "Clientes novos por dia",
+          "query": {
+            "metric": "new_customers",
+            "dimensions": [
+              "day"
+            ],
+            "period": "$period"
+          }
+        }
+      ]
+    }
+  ]
+}

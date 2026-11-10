@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dash AI Studio</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="#/">Dash AI <span>Studio</span> <small>protótipo local</small></a>
+    <div class="spacer"></div>
+    <label class="field-inline" title="Atalho do protótipo: num sistema real o cliente viria do login">Cliente <select id="tenant"></select></label>
+    <button class="btn small ghost" id="theme" title="Trocar tema">Tema</button>
+  </header>
+
+  <main id="view"></main>
+
+  <dialog id="spec-dlg">
+    <div class="dlg-head">
+      <h2 id="spec-dlg-title">Spec</h2>
+      <button class="btn small" id="spec-close">Fechar</button>
+    </div>
+    <div class="dlg-body">
+      <textarea id="spec-text" class="code" spellcheck="false"></textarea>
+      <div class="dlg-side vres" id="spec-result">
+        <p>Valide para ver as portas: formato, sentido, edição e dry-run.</p>
+      </div>
+    </div>
+    <div class="dlg-foot">
+      <button class="btn" id="spec-validate">Validar</button>
+      <button class="btn" id="spec-save-new">Salvar como novo</button>
+      <button class="btn primary" id="spec-save">Salvar neste</button>
+    </div>
+  </dialog>
+
+  <dialog id="pub-dlg" class="small">
+    <div class="dlg-head"><h2>Publicar dashboard</h2></div>
+    <div class="pub-body">
+      <label class="radio-card">
+        <input type="radio" name="vis" value="team" checked>
+        <span><b>Para o time</b><small>Todos deste cliente veem, na aba "Do time".</small></span>
+      </label>
+      <label class="radio-card">
+        <input type="radio" name="vis" value="individual">
+        <span><b>Só para mim</b><small>Fica em "Individuais". No MVP não há login: é só um rótulo.</small></span>
+      </label>
+      <p class="muted">Quem abre vê esta versão. O que você mudar depois no Studio só aparece quando publicar de novo.</p>
+    </div>
+    <div class="dlg-foot">
+      <button class="btn" id="pub-cancel">Cancelar</button>
+      <button class="btn primary" id="pub-ok">Publicar</button>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="blocks.js"></script>
+  <script src="app.js"></script>
+  <script src="studio.js"></script>
+</body>
+</html>
